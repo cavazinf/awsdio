@@ -1,0 +1,39 @@
+Certifique-se de que você configurou corretamente suas credenciais AWS antes de executar qualquer código.
+
+python
+Copy code
+import boto3
+
+# Inicializa o cliente da AWS
+ec2 = boto3.client('ec2')
+
+# Define uma função para identificar e encerrar instâncias ociosas
+def terminate_idle_instances():
+    # Obtém uma lista de todas as instâncias em execução
+    instances = ec2.describe_instances(Filters=[{'Name': 'instance-state-name', 'Values': ['running']}])
+
+    # Define um limite de tempo ocioso em minutos (por exemplo, 30 minutos)
+    idle_threshold_minutes = 30
+
+    for reservation in instances['Reservations']:
+        for instance in reservation['Instances']:
+            launch_time = instance['LaunchTime']
+            current_time = datetime.datetime.now(launch_time.tzinfo)
+
+            # Calcula o tempo de execução da instância em minutos
+            uptime_minutes = (current_time - launch_time).total_seconds() / 60
+
+            if uptime_minutes >= idle_threshold_minutes:
+                instance_id = instance['InstanceId']
+                print(f'Terminando instância ociosa: {instance_id}')
+                ec2.terminate_instances(InstanceIds=[instance_id])
+
+# Chama a função para encerrar instâncias ociosas
+terminate_idle_instances()
+Este é apenas um exemplo simples para encerrar instâncias ociosas após um determinado período de tempo. Você pode expandir esse código e criar estratégias mais avançadas para otimizar os custos da AWS, como:
+
+Agendar parada e início de instâncias com base em horários de uso.
+Implementar regras de dimensionamento automático para grupos de Auto Scaling.
+Usar instâncias reservadas ou instâncias spot para reduzir os custos.
+Monitorar e analisar o uso dos recursos usando serviços como o AWS CloudWatch.
+Implementar políticas de gerenciamento de custos usando o AWS Budgets.
