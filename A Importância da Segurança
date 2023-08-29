@@ -1,0 +1,23 @@
+import boto3
+
+# Inicializa o cliente da AWS Config
+config = boto3.client('config')
+
+# Define uma função para verificar o status de conformidade das regras de segurança
+def check_security_compliance():
+    # Lista as regras de conformidade disponíveis
+    compliance_rules = config.describe_config_rules()
+
+    # Verifica o status de conformidade para cada regra
+    for rule in compliance_rules['ConfigRules']:
+        rule_name = rule['ConfigRuleName']
+        compliance = config.get_compliance_details_by_config_rule(ConfigRuleName=rule_name)
+
+        # Verifica se a regra não está em conformidade
+        if compliance['EvaluationResults'][0]['ComplianceType'] != 'COMPLIANT':
+            print(f'Regra de segurança não está em conformidade: {rule_name}')
+            print(f'Detalhes: {compliance["EvaluationResults"][0]["Annotation"]}')
+            print('---')
+
+# Chama a função para verificar a conformidade de segurança
+check_security_compliance()
